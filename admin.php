@@ -8,6 +8,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+// Leads grouped by number of bedrooms
+$leadsByBedroomsQuery = "SELECT bedrooms, COUNT(*) AS total FROM leads GROUP BY bedrooms ORDER BY bedrooms ASC";
+$leadsByBedroomsResult = $conn->query($leadsByBedroomsQuery);
+
+
 // Total number of available leads
 $totalLeadsQuery = "SELECT COUNT(*) AS total FROM leads WHERE booking_status = 0"; // Assuming booking_status = 0 means available
 $totalLeadsResult = $conn->query($totalLeadsQuery);
@@ -118,6 +123,24 @@ $result = $conn->query($sql);
             </div>
         </div>
     </div>
+
+    <!-- Leads Overview By Bedrooms Section -->
+    <div class="container mt-5">
+        <h2>Leads Overview By Bedrooms</h2>
+        <div class="row">
+            <?php while ($row = $leadsByBedroomsResult->fetch_assoc()) : ?>
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title"><?= $row['bedrooms'] ?> Bedroom<?= $row['bedrooms'] != 1 ? 's' : '' ?></h5>
+                            <p class="card-text"><?= $row['total'] ?> lead<?= $row['total'] != 1 ? 's' : '' ?> available</p>
+                        </div>
+                    </div>
+                </div>
+            <?php endwhile; ?>
+        </div>
+    </div>
+
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>

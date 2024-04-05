@@ -107,6 +107,7 @@ $activeUsers = $conn->query($query);
 
                         <!-- Edit credits -->
                         <div class="input-group mb-2">
+                            <p>Edit Credits</p>
                             <input type="number" class="form-control" name="credits" placeholder="Credits" value="<?= $user['credits']; ?>">
                             <div class="input-group-append">
                                 <button type="submit" class="btn btn-info" name="action" value="edit_credits">Update Credits</button>
@@ -115,6 +116,7 @@ $activeUsers = $conn->query($query);
 
                         <!-- Change username -->
                         <div class="input-group mb-2">
+                            <p>Change Username</p>
                             <input type="text" class="form-control" name="username" placeholder="New username">
                             <div class="input-group-append">
                                 <button type="submit" class="btn btn-secondary" name="action" value="change_username">Change Username</button>
@@ -123,6 +125,7 @@ $activeUsers = $conn->query($query);
 
                         <!-- Change password -->
                         <div class="input-group mb-2">
+                            <p>Change Password</p>
                             <input type="password" class="form-control" name="password" placeholder="New password">
                             <div class="input-group-append">
                                 <button type="submit" class="btn btn-secondary" name="action" value="change_password">Change Password</button>
