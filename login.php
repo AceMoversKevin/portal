@@ -55,15 +55,78 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username']) && isset($
     <title>Records Portal</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f7f7f7;
+            padding-top: 5%;
+        }
+
+        .container {
+            max-width: 400px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .form-control {
+            border-radius: 20px;
+        }
+
+        label {
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            /* Adjusts buttons to each end */
+            align-items: center;
+            gap: 10px;
+            /* Adds a small gap between buttons */
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            flex-grow: 1;
+            /* Allows buttons to expand and fill available space */
+            margin: 5px;
+            /* Adds a small margin around buttons */
+        }
+    </style>
+
 </head>
 
 <body>
-    <div class="container mt-5">
-
+    <!-- Form and Buttons Container -->
+    <div class="container">
         <h2>Login</h2>
         <?php if (!empty($error_message)) : ?>
             <div class="alert alert-danger"><?php echo $error_message; ?></div>
         <?php endif; ?>
+
+        <!-- Login Form -->
         <form action="login.php" method="post">
             <div class="form-group">
                 <label for="username">Username:</label>
@@ -73,12 +136,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username']) && isset($
                 <label for="password">Password:</label>
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
 
-        <!-- Sign Up Button -->
-        <a href="signup.php" class="btn btn-primary">Sign Up</a>
+            <!-- Buttons Container -->
+            <div class="buttons-container">
+                <button type="submit" class="btn btn-primary">Login</button>
+                <a href="signup.php" class="btn btn-secondary">Sign Up</a>
+            </div>
+        </form>
     </div>
+
 </body>
 
 </html>
