@@ -8,8 +8,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username']) && isset($
     $username = $conn->real_escape_string($_POST['username']);
     $password = $conn->real_escape_string($_POST['password']); // Remember to hash passwords in real applications
 
-    // Adjusted SQL query to also check if the user account is active
-    $sql = "SELECT user_id, username, role, credits FROM users WHERE username = ? AND password = ? AND isActive = 1";
+    // Adjusted SQL query to also select the 'emails' address and check if the user account is active
+    $sql = "SELECT user_id, username, emails, role, credits FROM users WHERE username = ? AND password = ? AND isActive = 1";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ss", $username, $password);
     $stmt->execute();
@@ -19,6 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username']) && isset($
         $user = $result->fetch_assoc();
         $_SESSION['user_id'] = $user['user_id'];
         $_SESSION['username'] = $user['username'];
+        $_SESSION['email'] = $user['emails']; // Store the email address in the session using the correct column name
         $_SESSION['role'] = $user['role'];
         $_SESSION['credits'] = $user['credits'];
         // Redirect user to the index page or dashboard
@@ -44,7 +45,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username']) && isset($
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
