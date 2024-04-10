@@ -17,7 +17,7 @@ $sql = "SELECT leads.* FROM leads
         WHERE user_quotations.lead_id IS NULL AND leads.booking_status = 0";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $user_id); // Assuming user_id is stored as a string in your session
+$stmt->bind_param("s", $user_id); // user_id is a session variable
 $stmt->execute();
 $result = $stmt->get_result();
 
