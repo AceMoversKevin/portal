@@ -42,8 +42,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <div class="container">
-        <h2>Sign Up</h2>
-        <p>Please enter your phone number. It will be your User ID and must be in the format 0412345678 to ensure verification.</p>
+        <h2 class="text-center">Sign Up</h2>
+        <p class="text-center">Please enter your phone number. It will be your User ID and must be in the format 0412345678 to ensure verification.</p>
         <?php if (!empty($error_message)) { echo "<div class='alert alert-danger'>$error_message</div>"; } ?>
         <form action="signup.php" method="post">
             <div class="form-group">
@@ -58,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="password">Password</label>
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="btn btn-primary btn-block">Register</button>
         </form>
     </div>
 

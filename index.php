@@ -3,16 +3,17 @@ session_start();
 require 'session_check.php';
 include 'db.php'; // Ensure this points to your database connection file
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id'])) {  //if it isnt set redirect to the login page
     header("Location: login.php");
     exit;
 }
 
-$user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user_id']; //user id from the session
 
 // Adjusted query to exclude leads accepted by the user
+//selects all leads not accepted by the user,(booking 0)
 $sql = "SELECT leads.* FROM leads
-        LEFT JOIN user_quotations ON leads.lead_id = user_quotations.lead_id AND user_quotations.user_id = ?
+        LEFT JOIN user_quotations ON leads.lead_id = user_quotations.lead_id AND user_quotations.user_id = ?  
         WHERE user_quotations.lead_id IS NULL AND leads.booking_status = 0";
 
 $stmt = $conn->prepare($sql);
@@ -34,57 +35,64 @@ $result = $stmt->get_result();
 </head>
 
 <body>
-
-    <header class="mb-3 py-3">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div class="user-info">
+    
+<header class="mb-3 py-3">
+    <div class="container-fluid">
+        <div class="row justify-content-between align-items-center">
+            <div class="col-md-6 col-lg-4 user-info">
                 <img src="user.svg" alt="User icon">
                 <!-- Display the username and credits from the session -->
                 <span><?= htmlspecialchars($_SESSION['username']); ?> (Credits: <?= htmlspecialchars($_SESSION['credits']); ?>)</span>
             </div>
-            <div>
+            <div class="col-md-6 col-lg-4 text-md-right">
                 <a href="index.php" class="btn btn-outline-secondary">All Leads</a>
                 <a href="userleads.php" class="btn btn-outline-primary">Accepted Leads</a>
             </div>
-            <div>
+            <div class="col-lg-4 text-lg-right mt-3 mt-md-0">
                 <a href="logout.php" class="btn btn-outline-danger">Logout</a>
             </div>
         </div>
-    </header>
+    </div>
+</header>
+
 
     </div>
     </header>
 
     <div class="container mt-5">
-        <h2 class="mb-4">Available Leads</h2>
-        <div class="row">
-            <?php
-            if ($result->num_rows > 0) {
-                // Output data of each row
-                while ($row = $result->fetch_assoc()) {
-                    echo '<div class="col-md-4 mb-4">';
-                    echo '<div class="card"style="width: 18rem;"> ';
-                    echo '<div class="card-body">';
-                    echo '<h5 class="card-title">' . htmlspecialchars($row["lead_name"]) . '</h5>';
-                    echo '<h6 class="card-subtitle mb-2 text-muted">Available lead</h6>';
-                    echo '<li class="list-group-item">Bedrooms: ' . htmlspecialchars($row["bedrooms"]) . '</li>';
-                    echo '<li class="list-group-item">Pick Up: ' . htmlspecialchars($row["pickup"]) . '</li>';
-                    echo '<li class="list-group-item">Drop Off: ' . htmlspecialchars($row["dropoff"]) . '</li>';
-                    // Form for accepting a lead
-                    echo '<form action="accept_lead.php" method="post">';
-                    echo '<input type="hidden" name="lead_id" value="' . htmlspecialchars($row['lead_id']) . '">';
-                    echo '<button type="submit" class="btn btn-success">Accept Lead</button>';
-                    echo '</form>';
-                    echo '</div>';
-                    echo '</div>';
-                    echo '</div>';
-                }
-            } else {
-                echo "0 results found.";
+    <h2 class="mb-4">Available Leads</h2>
+    <div class="row">
+        <?php
+        if ($result->num_rows > 0) {
+            // Output data of each row
+            while ($row = $result->fetch_assoc()) {
+                ?>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><?= htmlspecialchars($row["lead_name"]) ?></h5>
+                            <h6 class="card-subtitle mb-2 text-muted">Available lead</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Bedrooms: <?= htmlspecialchars($row["bedrooms"]) ?></li>
+                                <li class="list-group-item">Pick Up: <?= htmlspecialchars($row["pickup"]) ?></li>
+                                <li class="list-group-item">Drop Off: <?= htmlspecialchars($row["dropoff"]) ?></li>
+                            </ul>
+                            <!-- Form for accepting a lead -->
+                            <form action="accept_lead.php" method="post">
+                                <input type="hidden" name="lead_id" value="<?= htmlspecialchars($row['lead_id']) ?>">
+                                <button type="submit" class="btn btn-success mt-3">Accept Lead</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <?php
             }
-            ?>
-        </div>
+        } else {
+            echo "0 results found.";
+        }
+        ?>
     </div>
+</div>
 
     <script>
         // Check for the 'error' query parameter in the URL

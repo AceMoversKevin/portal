@@ -69,6 +69,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username']) && isset($
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0 auto; /* Center the container horizontally */
+            margin-top: 5%; /* Adjust top margin */
         }
 
         .btn-primary {
@@ -97,23 +99,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username']) && isset($
             text-align: center;
             margin-bottom: 2rem;
         }
-
-        .buttons-container {
-            display: flex;
-            justify-content: space-between;
-            /* Adjusts buttons to each end */
-            align-items: center;
-            gap: 10px;
-            /* Adds a small gap between buttons */
-        }
-
-        .btn-primary,
-        .btn-secondary {
-            flex-grow: 1;
-            /* Allows buttons to expand and fill available space */
-            margin: 5px;
-            /* Adds a small margin around buttons */
-        }
     </style>
 
 </head>
@@ -138,9 +123,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['username']) && isset($
             </div>
 
             <!-- Buttons Container -->
-            <div class="buttons-container">
-                <button type="submit" class="btn btn-primary">Login</button>
-                <a href="signup.php" class="btn btn-secondary">Sign Up</a>
+            <div class="row">
+                <div class="col">
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </div>
+                <div class="col">
+                    <a href="signup.php" class="btn btn-secondary btn-block">Sign Up</a>
+                </div>
             </div>
         </form>
     </div>
