@@ -1,9 +1,9 @@
 <?php
 session_start();
 require 'db.php'; // Adjust this as necessary
-require 'PHPMailer-master/src/Exception.php';
-require 'PHPMailer-master/src/PHPMailer.php';
-require 'PHPMailer-master/src/SMTP.php';
+require 'Exception.php';
+require 'PHPMailer.php';
+require 'SMTP.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -16,40 +16,75 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $user_email = $_SESSION['email']; // Assuming email is stored in the session
 
-// First, check if the user has enough credits
-$creditCheckSql = "SELECT credits FROM users WHERE user_id = ?";
-$stmt = $conn->prepare($creditCheckSql);
-$stmt->bind_param("s", $user_id);
-$stmt->execute();
-$creditResult = $stmt->get_result();
-$userCredits = 0;
 
-if ($row = $creditResult->fetch_assoc()) {
-    $userCredits = $row['credits'];
-}
-
-if ($userCredits < 10) {
-    header("Location: index.php?error=notenoughcredits");
-    exit;
-}
-
-// User has enough credits, proceed to accept the lead
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['lead_id'])) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['lead_id'], $_POST['lead_type'])) {
     $lead_id = $conn->real_escape_string($_POST['lead_id']);
+    $lead_type = $conn->real_escape_string($_POST['lead_type']);
 
-    // Begin transaction
+    // Check if the lead exists and its acceptance limit
+    $acceptanceCheckSql = "SELECT acceptanceLimit FROM leads WHERE lead_id = ?";
+    $acceptanceCheckStmt = $conn->prepare($acceptanceCheckSql);
+    $acceptanceCheckStmt->bind_param("i", $lead_id);
+    $acceptanceCheckStmt->execute();
+    $acceptanceCheckResult = $acceptanceCheckStmt->get_result();
+    $acceptanceRow = $acceptanceCheckResult->fetch_assoc();
+    
+    if (!$acceptanceRow || $acceptanceRow['acceptanceLimit'] <= 0) {
+        header("Location: index.php?error=leadnotavailable");
+        exit;
+    }
+
+    $creditDeduction = 0;
+    $acceptanceUpdateSql = "";
+    $newAcceptanceLimit = 0; // To store the updated acceptance limit
+
+    // Deduct credits based on lead type and update acceptance limit
+    if ($lead_type == 'premium') {
+        $creditDeduction = 30;
+        $newAcceptanceLimit = 0;
+    } elseif ($lead_type == 'normal') {
+        $creditDeduction = 10;
+        $newAcceptanceLimit = $acceptanceRow['acceptanceLimit'] - 1;
+    } else {
+        header("Location: index.php?error=invalidleadtype");
+        exit;
+    }
+
+    // Check if user has enough credits
+    $creditCheckSql = "SELECT credits FROM users WHERE user_id = ?";
+    $creditCheckStmt = $conn->prepare($creditCheckSql);
+    $creditCheckStmt->bind_param("s", $user_id);
+    $creditCheckStmt->execute();
+    $creditResult = $creditCheckStmt->get_result()->fetch_assoc();
+
+    if ($creditResult['credits'] < $creditDeduction) {
+        header("Location: index.php?error=notenoughcredits");
+        exit;
+    }
+
+    // Begin transaction for updating user credits, lead acceptance limit, and adding entry to user_quotations
     $conn->begin_transaction();
 
     try {
-        $deductSql = "UPDATE users SET credits = credits - 10 WHERE user_id = ?";
+        // Deduct credits from user
+        $deductSql = "UPDATE users SET credits = credits - ? WHERE user_id = ?";
         $deductStmt = $conn->prepare($deductSql);
-        $deductStmt->bind_param("s", $user_id);
+        $deductStmt->bind_param("is", $creditDeduction, $user_id);
         $deductStmt->execute();
 
+        // Update lead acceptance limit
+        $acceptanceUpdateSql = "UPDATE leads SET acceptanceLimit = ? WHERE lead_id = ?";
+        $acceptanceUpdateStmt = $conn->prepare($acceptanceUpdateSql);
+        $acceptanceUpdateStmt->bind_param("ii", $newAcceptanceLimit, $lead_id);
+        $acceptanceUpdateStmt->execute();
+
+        // Insert lead acceptance record
         $insertSql = "INSERT INTO user_quotations (user_id, lead_id, accepted_at) VALUES (?, ?, NOW())";
         $insertStmt = $conn->prepare($insertSql);
         $insertStmt->bind_param("si", $user_id, $lead_id);
         $insertStmt->execute();
+
+        $conn->commit();
 
         // Get the lead details for the email
         $leadDetailsQuery = "SELECT * FROM leads WHERE lead_id = ?";
@@ -59,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['lead_id'])) {
         $leadDetailsResult = $leadDetailsStmt->get_result();
         $leadDetails = $leadDetailsResult->fetch_assoc();
 
-        // Assuming you have a function to format the lead details into a string for the email
+        
         $emailBody = "Here are the details of the lead you accepted: " . formatLeadDetails($leadDetails);
 
         $mail = new PHPMailer(true);
@@ -79,7 +114,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['lead_id'])) {
 
         $mail->send();
 
-        $_SESSION['credits'] -= 10;
+        // Update session credits
+        $_SESSION['credits'] -= $creditDeduction;
         $conn->commit();
         header("Location: userleads.php?success=1");
         exit;
@@ -93,9 +129,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['lead_id'])) {
     exit;
 }
 
-// Placeholder for the formatLeadDetails function
-// You will need to implement this function to format the lead details into a string for the email
-function formatLeadDetails($details) {
+
+function formatLeadDetails($details)
+{
     // Initialize the details string
     $detailsString = "<h2>Lead Details</h2>";
 
@@ -134,5 +170,3 @@ function formatLeadDetails($details) {
 
     return $detailsString;
 }
-
-?>

@@ -13,8 +13,8 @@ $user_id = $_SESSION['user_id']; //user id from the session
 // Adjusted query to exclude leads accepted by the user
 //selects all leads not accepted by the user,(booking 0)
 $sql = "SELECT leads.* FROM leads
-        LEFT JOIN user_quotations ON leads.lead_id = user_quotations.lead_id AND user_quotations.user_id = ?  
-        WHERE user_quotations.lead_id IS NULL AND leads.booking_status = 0";
+        LEFT JOIN user_quotations ON leads.lead_id = user_quotations.lead_id AND user_quotations.user_id = ?
+        WHERE user_quotations.lead_id IS NULL AND leads.booking_status = 0 AND leads.acceptanceLimit > 0";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $user_id); // user_id is a session variable
@@ -35,64 +35,96 @@ $result = $stmt->get_result();
 </head>
 
 <body>
-    
-<header class="mb-3 py-3">
-    <div class="container-fluid">
-        <div class="row justify-content-between align-items-center">
-            <div class="col-md-6 col-lg-4 user-info">
-                <img src="user.svg" alt="User icon">
-                <!-- Display the username and credits from the session -->
-                <span><?= htmlspecialchars($_SESSION['username']); ?> (Credits: <?= htmlspecialchars($_SESSION['credits']); ?>)</span>
-            </div>
-            <div class="col-md-6 col-lg-4 text-md-right">
-                <a href="index.php" class="btn btn-outline-secondary">All Leads</a>
-                <a href="userleads.php" class="btn btn-outline-primary">Accepted Leads</a>
-            </div>
-            <div class="col-lg-4 text-lg-right mt-3 mt-md-0">
-                <a href="logout.php" class="btn btn-outline-danger">Logout</a>
+
+    <header class="mb-3 py-3">
+        <div class="container-fluid">
+            <div class="row justify-content-between align-items-center">
+                <div class="col-md-6 col-lg-4 user-info">
+                    <img src="user.svg" alt="User icon">
+                    <!-- Display the username and credits from the session -->
+                    <span><?= htmlspecialchars($_SESSION['username']); ?> (Credits: <?= htmlspecialchars($_SESSION['credits']); ?>)</span>
+                </div>
+                <div class="col-md-6 col-lg-4 text-md-right">
+                    <a href="index.php" class="btn btn-outline-secondary">All Leads</a>
+                    <a href="userleads.php" class="btn btn-outline-primary">Accepted Leads</a>
+                </div>
+                <div class="col-lg-4 text-lg-right mt-3 mt-md-0">
+                    <a href="logout.php" class="btn btn-outline-danger">Logout</a>
+                </div>
             </div>
         </div>
-    </div>
-</header>
+    </header>
 
 
     </div>
     </header>
 
     <div class="container mt-5">
-    <h2 class="mb-4">Available Leads</h2>
-    <div class="row">
-        <?php
-        if ($result->num_rows > 0) {
-            // Output data of each row
-            while ($row = $result->fetch_assoc()) {
-                ?>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title"><?= htmlspecialchars($row["lead_name"]) ?></h5>
-                            <h6 class="card-subtitle mb-2 text-muted">Available lead</h6>
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item">Bedrooms: <?= htmlspecialchars($row["bedrooms"]) ?></li>
-                                <li class="list-group-item">Pick Up: <?= htmlspecialchars($row["pickup"]) ?></li>
-                                <li class="list-group-item">Drop Off: <?= htmlspecialchars($row["dropoff"]) ?></li>
-                            </ul>
-                            <!-- Form for accepting a lead -->
-                            <form action="accept_lead.php" method="post">
-                                <input type="hidden" name="lead_id" value="<?= htmlspecialchars($row['lead_id']) ?>">
-                                <button type="submit" class="btn btn-success mt-3">Accept Lead</button>
-                            </form>
+        <h2 class="mb-4">Available Leads</h2>
+        <div class="row">
+            <?php
+            if ($result->num_rows > 0) {
+                // Output data of each row
+                while ($row = $result->fetch_assoc()) {
+            ?>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><?= htmlspecialchars($row["lead_name"]) ?></h5>
+                                <h6 class="card-subtitle mb-2 text-muted">Available lead</h6>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Bedrooms: <?= htmlspecialchars($row["bedrooms"]) ?></li>
+                                    <li class="list-group-item">Pick Up: <?= htmlspecialchars($row["pickup"]) ?></li>
+                                    <li class="list-group-item">Drop Off: <?= htmlspecialchars($row["dropoff"]) ?></li>
+                                </ul>
+                                <!-- Dropdown for accepting a lead -->
+                                <div id="lead-action-container-<?= $row['lead_id'] ?>" class="mt-3">
+                                    <button class="btn btn-success" type="button" onclick="showLeadOptions(<?= $row['lead_id'] ?>)">Accept Lead</button>
+                                    <script>
+                                        function showLeadOptions(leadId) {
+                                            const container = document.getElementById('lead-action-container-' + leadId);
+                                            container.innerHTML = `
+        <button class="btn btn-primary" type="button" onclick="acceptLead(${leadId}, 'premium')">Premium Lead</button>
+        <button class="btn btn-secondary" type="button" onclick="acceptLead(${leadId}, 'normal')">Normal Lead</button>
+    `;
+                                        }
+
+                                        function acceptLead(leadId, type) {
+                                            const form = document.createElement('form');
+                                            form.action = 'accept_lead.php';
+                                            form.method = 'post';
+
+                                            const leadIdInput = document.createElement('input');
+                                            leadIdInput.type = 'hidden';
+                                            leadIdInput.name = 'lead_id';
+                                            leadIdInput.value = leadId;
+
+                                            const typeInput = document.createElement('input');
+                                            typeInput.type = 'hidden';
+                                            typeInput.name = 'lead_type';
+                                            typeInput.value = type;
+
+                                            form.appendChild(leadIdInput);
+                                            form.appendChild(typeInput);
+                                            document.body.appendChild(form);
+                                            form.submit();
+                                        }
+                                    </script>
+
+                                </div>
+
+
+                            </div>
                         </div>
                     </div>
-                </div>
-                <?php
+            <?php
+                }
+            } else {
+                echo "0 results found.";
             }
-        } else {
-            echo "0 results found.";
-        }
-        ?>
+            ?>
+        </div>
     </div>
-</div>
 
     <script>
         // Check for the 'error' query parameter in the URL

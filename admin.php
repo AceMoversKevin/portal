@@ -127,23 +127,6 @@ $result = $conn->query($sql);
         </div>
     </div>
 
-    <!-- Leads Overview By Bedrooms Section -->
-    <div class="container mt-5">
-        <h2>Leads Overview By Bedrooms</h2>
-        <div class="row">
-            <?php while ($row = $leadsByBedroomsResult->fetch_assoc()) : ?>
-                <div class="col-md-4 mb-4">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title"><?= $row['bedrooms'] ?> Bedroom<?= $row['bedrooms'] != 1 ? 's' : '' ?></h5>
-                            <p class="card-text"><?= $row['total'] ?> lead<?= $row['total'] != 1 ? 's' : '' ?> available</p>
-                        </div>
-                    </div>
-                </div>
-            <?php endwhile; ?>
-        </div>
-    </div>
-
     <!-- Container for Charts -->
     <div class="container mt-5">
         <h2>Charts</h2>
