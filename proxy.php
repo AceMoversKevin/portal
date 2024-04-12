@@ -9,7 +9,7 @@ if (!isset($data['coordinates'])) {
 }
 
 $url = 'https://api.openrouteservice.org/v2/directions/driving-car';
-$apiKey = '5b3ce3597851110001cf62489161ba1d575b489d9797570815527731'; // Replace this with your actual ORS API key
+$apiKey = '5b3ce3597851110001cf62489161ba1d575b489d9797570815527731'; // ORS API key will need to be encoded before pushing to production
 $postData = [
     'coordinates' => $data['coordinates']
 ];

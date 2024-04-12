@@ -10,14 +10,33 @@ if (!isset($_SESSION['user_id'])) {  //if it isnt set redirect to the login page
 
 $user_id = $_SESSION['user_id']; //user id from the session
 
-// Adjusted query to exclude leads accepted by the user
-//selects all leads not accepted by the user,(booking 0)
-$sql = "SELECT leads.* FROM leads
-        LEFT JOIN user_quotations ON leads.lead_id = user_quotations.lead_id AND user_quotations.user_id = ?
-        WHERE user_quotations.lead_id IS NULL AND leads.booking_status = 0 AND leads.acceptanceLimit > 0";
+$startDate = isset($_GET['start_date']) ? $_GET['start_date'] : null;
+$endDate = isset($_GET['end_date']) ? $_GET['end_date'] : null;
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $user_id); // user_id is a session variable
+if ($startDate && $endDate) {
+    $startDate = date('Y-m-d', strtotime($startDate));
+    $endDate = date('Y-m-d', strtotime($endDate));
+
+    // Update your SQL query to filter based on the date range
+    $sql = "SELECT leads.* FROM leads
+            LEFT JOIN user_quotations ON leads.lead_id = user_quotations.lead_id AND user_quotations.user_id = ?
+            WHERE user_quotations.lead_id IS NULL
+            AND leads.booking_status = 0
+            AND leads.acceptanceLimit > 0
+            AND DATE(leads.created_at) BETWEEN ? AND ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sss", $user_id, $startDate, $endDate); // Bind parameters
+} else {
+    // Original SQL query if no dates are selected
+    $sql = "SELECT leads.* FROM leads
+            LEFT JOIN user_quotations ON leads.lead_id = user_quotations.lead_id AND user_quotations.user_id = ?
+            WHERE user_quotations.lead_id IS NULL
+            AND leads.booking_status = 0
+            AND leads.acceptanceLimit > 0";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $user_id); // user_id is a session variable
+}
+
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -32,6 +51,13 @@ $result = $stmt->get_result();
     <title>Records Portal</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="style.css">
+    <!-- Include Date Range Picker CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <!-- Include Date Range Picker JavaScript and its dependencies -->
+    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
 </head>
 
 <body>
@@ -41,18 +67,25 @@ $result = $stmt->get_result();
             <div class="row justify-content-between align-items-center">
                 <div class="col-md-6 col-lg-4 user-info">
                     <img src="user.svg" alt="User icon">
-                    <!-- Display the username and credits from the session -->
                     <span><?= htmlspecialchars($_SESSION['username']); ?> (Credits: <?= htmlspecialchars($_SESSION['credits']); ?>)</span>
+                </div>
+                <!-- Date Range Selector should be within its own column -->
+                <div class="col-lg-4">
+                    <form id="dateRangeForm" action="index.php" method="GET" class="form-inline">
+                        <input type="date" name="start_date" id="startDatePicker" placeholder="Start Date" class="form-control mr-2">
+                        <input type="date" name="end_date" id="endDatePicker" placeholder="End Date" class="form-control mr-2">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </form>
+
                 </div>
                 <div class="col-md-6 col-lg-4 text-md-right">
                     <a href="index.php" class="btn btn-outline-secondary">All Leads</a>
                     <a href="userleads.php" class="btn btn-outline-primary">Accepted Leads</a>
-                </div>
-                <div class="col-lg-4 text-lg-right mt-3 mt-md-0">
                     <a href="logout.php" class="btn btn-outline-danger">Logout</a>
                 </div>
             </div>
         </div>
+
     </header>
 
 
@@ -136,6 +169,24 @@ $result = $stmt->get_result();
             }
         }
     </script>
+    <script>
+        $(function() {
+            $('#startDatePicker').daterangepicker({
+                singleDatePicker: true,
+                locale: {
+                    format: 'YYYY-MM-DD' // Use the format that matches your database date format
+                }
+            });
+
+            $('#endDatePicker').daterangepicker({
+                singleDatePicker: true,
+                locale: {
+                    format: 'YYYY-MM-DD' // Use the format that matches your database date format
+                }
+            });
+        });
+    </script>
+
 
 
     <!-- Bootstrap JS, Popper.js, and jQuery -->

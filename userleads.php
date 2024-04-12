@@ -142,11 +142,16 @@ function geocode($location)
         var mapContainers = document.querySelectorAll('.map-container');
 
         mapContainers.forEach(function(container) {
+            // Parse and validate latitude and longitude values
             var pickupLat = parseFloat(container.getAttribute('data-pickup-lat'));
             var pickupLng = parseFloat(container.getAttribute('data-pickup-lng'));
             var dropoffLat = parseFloat(container.getAttribute('data-dropoff-lat'));
             var dropoffLng = parseFloat(container.getAttribute('data-dropoff-lng'));
-
+            
+            if (isNaN(pickupLat) || isNaN(pickupLng) || isNaN(dropoffLat) || isNaN(dropoffLng)) {
+                console.error('Invalid coordinates:', pickupLat, pickupLng, dropoffLat, dropoffLng);
+                return; // Do not proceed if coordinates are not valid numbers
+            }
             var mapId = container.getAttribute('id');
             var map = L.map(mapId, {
                 zoomControl: false, // Disable zoom control
@@ -157,7 +162,7 @@ function geocode($location)
             }).setView([pickupLat, pickupLng], 13);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
+                attribution: '© AceMovers Map Parsing'
             }).addTo(map);
 
             var pickupLatLng = L.latLng(pickupLat, pickupLng);
@@ -174,48 +179,48 @@ function geocode($location)
             // Set max bounds with some padding to ensure the markers are not on the edge
             map.setMaxBounds(bounds.pad(0.1)); // Increase padding value for larger bounds around the area
 
-            $.ajax({
-                url: 'proxy.php',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    coordinates: [
-                        [pickupLng, pickupLat],
-                        [dropoffLng, dropoffLat]
-                    ]
-                }),
-                success: function(response) {
-                    try {
-                        var data = (typeof response === 'string') ? JSON.parse(response) : response;
+            // $.ajax({
+            //     url: 'proxy.php',
+            //     type: 'POST',
+            //     contentType: 'application/json',
+            //     data: JSON.stringify({
+            //         coordinates: [
+            //             [pickupLng, pickupLat],
+            //             [dropoffLng, dropoffLat]
+            //         ]
+            //     }),
+            //     success: function(response) {
+            //         try {
+            //             var data = (typeof response === 'string') ? JSON.parse(response) : response;
 
-                        if (data && data.routes && data.routes.length > 0) {
-                            var encoded = data.routes[0].geometry;
-                            var decodedPolyline = L.PolylineUtil.decode(encoded, 6);
+            //             if (data && data.routes && data.routes.length > 0) {
+            //                 // var encoded = data.routes[0].geometry;
+            //                 // var decodedPolyline = L.PolylineUtil.decode(encoded, 6);
 
-                            // Add the decoded polyline to the map
-                            var routeLine = L.polyline(decodedPolyline, {
-                                color: 'red'
-                            }).addTo(map);
+            //                 // Add the decoded polyline to the map
+            //                 // var routeLine = L.polyline(decodedPolyline, {
+            //                 //     color: 'red'
+            //                 // }).addTo(map);
 
-                            // Use the polyline bounds to extend the map bounds
-                            // bounds.extend(routeLine.getBounds());
+            //                 // Use the polyline bounds to extend the map bounds
+            //                 // bounds.extend(routeLine.getBounds());
 
-                            // Fit the map to the new extended bounds
-                            // map.fitBounds(bounds, {
-                            //     padding: [50, 50]
-                            // });
+            //                 // Fit the map to the new extended bounds
+            //                 // map.fitBounds(bounds, {
+            //                 //     padding: [50, 50]
+            //                 // });
 
-                            // Display the route's distance and duration
-                            var distance = data.routes[0].summary.distance / 1000; // Convert to kilometers
-                            var duration = data.routes[0].summary.duration / 60; // Convert to minutes
-                            var infoText = `<p> ${distance.toFixed(2)} km  ${duration.toFixed(0)} minutes</p>`;
-                            container.insertAdjacentHTML('afterend', infoText);
-                        }
-                    } catch (e) {
-                        console.error('Error processing the response:', e);
-                    }
-                }
-            });
+            //                 // Display the route's distance and duration
+            //                 var distance = data.routes[0].summary.distance / 1000; // Convert to kilometers
+            //                 var duration = data.routes[0].summary.duration / 60; // Convert to minutes
+            //                 var infoText = `<p> ${distance.toFixed(2)} km  ${duration.toFixed(0)} minutes</p>`;
+            //                 container.insertAdjacentHTML('afterend', infoText);
+            //             }
+            //         } catch (e) {
+            //             console.error('Error processing the response:', e);
+            //         }
+            //     }
+            // });
         });
     </script>
     <script>
