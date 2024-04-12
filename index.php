@@ -17,7 +17,7 @@ if ($startDate && $endDate) {
     $startDate = date('Y-m-d', strtotime($startDate));
     $endDate = date('Y-m-d', strtotime($endDate));
 
-    // Update your SQL query to filter based on the date range
+    // Updated SQL query to filter based on the date range
     $sql = "SELECT leads.* FROM leads
             LEFT JOIN user_quotations ON leads.lead_id = user_quotations.lead_id AND user_quotations.user_id = ?
             WHERE user_quotations.lead_id IS NULL
