@@ -30,7 +30,7 @@ function geocode($location)
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'YourAppName/1.0'); // Set a custom user agent
+    curl_setopt($ch, CURLOPT_USERAGENT, 'ACELeads/1.0'); // Set a custom user agent
     $response = curl_exec($ch);
     curl_close($ch);
 
