@@ -37,7 +37,8 @@ $pendingUsersCount = $pendingUsersRow['pending'];
 
 
 // Fetch all users from the database
-$sql = "SELECT user_id, username, role, created_at, credits, isActive FROM users";
+$sql = "SELECT user_id, username, role, created_at, credits, isActive FROM users WHERE role = 'user'";
+
 $result = $conn->query($sql);
 ?>
 
