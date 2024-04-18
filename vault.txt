@@ -18,3 +18,36 @@
         <!-- Sign Up Button -->
         <a href="signup.php" class="btn btn-primary">Sign Up</a>
     </div>
+
+
+
+        <div class="dropdown-menu">
+        <h2>Sign In</h2>
+        <?php if (!empty($error_message)) : ?>
+            <div class="alert alert-danger"><?php echo $error_message; ?></div>
+        <?php endif; ?>
+        <form class="px-4 py-3">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" placeholder="Enter Username" required>
+            </div>
+            <div class="form-group">
+                <label for="exampleDropdownFormPassword1">Password</label>
+                <input type="password" class="form-control" id="exampleDropdownFormPassword1" placeholder="Password" required>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="dropdownCheck">
+                <label class="form-check-label" for="dropdownCheck">
+                    Remember me
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary">Sign in</button>
+        </form>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="signup.php">New around here? Sign up</a>
+        <a class="dropdown-item" href="#">Forgot password?</a>
+    </div>
+
+    $sql = "SELECT leads.* FROM leads
+        LEFT JOIN user_quotations ON leads.lead_id = user_quotations.lead_id AND user_quotations.user_id = ?
+        WHERE user_quotations.lead_id IS NULL";
