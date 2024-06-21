@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 
 // Query to fetch active users
-$query = "SELECT user_id, username, role, created_at, credits FROM users WHERE isActive = 1";
+$query = "SELECT user_id, username, role, created_at, credits FROM users WHERE isActive = 1 AND role != 'admin'";
 $activeUsers = $conn->query($query);
 ?>
 
