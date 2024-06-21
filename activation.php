@@ -38,18 +38,19 @@ $inactiveUsers = $conn->query($query);
 
 <body>
 
-<header class="mb-3 py-3">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
-        <div class="d-flex flex-wrap">
-            <a href="admin.php" class="btn btn-outline-secondary mb-2 mb-md-0 mr-md-2">Dashboard</a>
-            <a href="users.php" class="btn btn-outline-primary mb-2 mb-md-0 mr-md-2">Active Users</a>
-            <a href="activation.php" class="btn btn-outline-info mb-2 mb-md-0 mr-md-2">Activation Requests</a>
+    <header class="mb-3 py-3">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <div class="d-flex flex-wrap">
+                <a href="admin.php" class="btn btn-outline-secondary mb-2 mb-md-0 mr-md-2">Dashboard</a>
+                <a href="users.php" class="btn btn-outline-primary mb-2 mb-md-0 mr-md-2">Active Users</a>
+                <a href="activation.php" class="btn btn-outline-info mb-2 mb-md-0 mr-md-2">Activation Requests</a>
+                <a href="leadsOverview.php" class="btn btn-outline-dark mb-2 mb-md-0 mr-md-2">Leads</a>
+            </div>
+            <div>
+                <a href="logout.php" class="btn btn-outline-danger">Logout</a>
+            </div>
         </div>
-        <div>
-            <a href="logout.php" class="btn btn-outline-danger">Logout</a>
-        </div>
-    </div>
-</header>
+    </header>
 
     <div class="container mt-4">
         <h2>Users Needing Activation</h2>
