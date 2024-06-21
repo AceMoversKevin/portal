@@ -88,6 +88,7 @@ $activeUsers = $conn->query($query);
             <a href="admin.php" class="btn btn-outline-secondary mb-2 mb-md-0 mr-md-2">Dashboard</a>
             <a href="users.php" class="btn btn-outline-primary mb-2 mb-md-0 mr-md-2">Active Users</a>
             <a href="activation.php" class="btn btn-outline-info mb-2 mb-md-0 mr-md-2">Activation Requests</a>
+            <a href="leadsOverview.php" class="btn btn-outline-dark mb-2 mb-md-0 mr-md-2">Leads</a>
         </div>
         <div>
             <a href="logout.php" class="btn btn-outline-danger">Logout</a>
