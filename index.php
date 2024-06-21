@@ -110,6 +110,17 @@ $result = $stmt->get_result();
                                     <li class="list-group-item">Bedrooms: <?= htmlspecialchars($row["bedrooms"]) ?></li>
                                     <li class="list-group-item">Pick Up: <?= htmlspecialchars($row["pickup"]) ?></li>
                                     <li class="list-group-item">Drop Off: <?= htmlspecialchars($row["dropoff"]) ?></li>
+                                    <li class="list-group-item">
+                                        Price:
+                                        <?php
+                                        $bedrooms = intval($row["bedrooms"]);
+                                        if ($bedrooms == 0 || $bedrooms == 1) {
+                                            echo "15 credits";
+                                        } else {
+                                            echo "25 credits";
+                                        }
+                                        ?>
+                                    </li>
                                 </ul>
                                 <!-- Dropdown for accepting a lead -->
                                 <div id="lead-action-container-<?= $row['lead_id'] ?>" class="mt-3">
@@ -118,9 +129,9 @@ $result = $stmt->get_result();
                                         function showLeadOptions(leadId) {
                                             const container = document.getElementById('lead-action-container-' + leadId);
                                             container.innerHTML = `
-        <button class="btn btn-primary" type="button" onclick="acceptLead(${leadId}, 'premium')">Premium Lead</button>
-        <button class="btn btn-secondary" type="button" onclick="acceptLead(${leadId}, 'normal')">Normal Lead</button>
-    `;
+                            <button class="btn btn-primary" type="button" onclick="acceptLead(${leadId}, 'premium')">Premium Lead</button>
+                            <button class="btn btn-secondary" type="button" onclick="acceptLead(${leadId}, 'normal')">Normal Lead</button>
+                        `;
                                         }
 
                                         function acceptLead(leadId, type) {
@@ -144,13 +155,11 @@ $result = $stmt->get_result();
                                             form.submit();
                                         }
                                     </script>
-
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
+
             <?php
                 }
             } else {

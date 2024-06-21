@@ -16,38 +16,32 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $user_email = $_SESSION['email']; // Assuming email is stored in the session
 
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['lead_id'], $_POST['lead_type'])) {
     $lead_id = $conn->real_escape_string($_POST['lead_id']);
     $lead_type = $conn->real_escape_string($_POST['lead_type']);
 
-    // Check if the lead exists and its acceptance limit
-    $acceptanceCheckSql = "SELECT acceptanceLimit FROM leads WHERE lead_id = ?";
-    $acceptanceCheckStmt = $conn->prepare($acceptanceCheckSql);
-    $acceptanceCheckStmt->bind_param("i", $lead_id);
-    $acceptanceCheckStmt->execute();
-    $acceptanceCheckResult = $acceptanceCheckStmt->get_result();
-    $acceptanceRow = $acceptanceCheckResult->fetch_assoc();
-    
-    if (!$acceptanceRow || $acceptanceRow['acceptanceLimit'] <= 0) {
+    // Fetch lead details including bedrooms
+    $leadDetailsQuery = "SELECT acceptanceLimit, bedrooms FROM leads WHERE lead_id = ?";
+    $leadDetailsStmt = $conn->prepare($leadDetailsQuery);
+    $leadDetailsStmt->bind_param("i", $lead_id);
+    $leadDetailsStmt->execute();
+    $leadDetailsResult = $leadDetailsStmt->get_result();
+    $leadDetails = $leadDetailsResult->fetch_assoc();
+
+    if (!$leadDetails || $leadDetails['acceptanceLimit'] <= 0) {
         header("Location: index.php?error=leadnotavailable");
         exit;
     }
 
+    $bedrooms = intval($leadDetails['bedrooms']);
     $creditDeduction = 0;
-    $acceptanceUpdateSql = "";
     $newAcceptanceLimit = 0; // To store the updated acceptance limit
 
-    // Deduct credits based on lead type and update acceptance limit
-    if ($lead_type == 'premium') {
-        $creditDeduction = 30;
-        $newAcceptanceLimit = 0;
-    } elseif ($lead_type == 'normal') {
-        $creditDeduction = 10;
-        $newAcceptanceLimit = $acceptanceRow['acceptanceLimit'] - 1;
+    // Deduct credits based on the number of bedrooms
+    if ($bedrooms == 0 || $bedrooms == 1) {
+        $creditDeduction = 15;
     } else {
-        header("Location: index.php?error=invalidleadtype");
-        exit;
+        $creditDeduction = 25;
     }
 
     // Check if user has enough credits
@@ -86,15 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['lead_id'], $_POST['lea
 
         $conn->commit();
 
-        // Get the lead details for the email
-        $leadDetailsQuery = "SELECT * FROM leads WHERE lead_id = ?";
-        $leadDetailsStmt = $conn->prepare($leadDetailsQuery);
-        $leadDetailsStmt->bind_param("i", $lead_id);
-        $leadDetailsStmt->execute();
-        $leadDetailsResult = $leadDetailsStmt->get_result();
-        $leadDetails = $leadDetailsResult->fetch_assoc();
-
-        
+        // Prepare email to send to user
         $emailBody = "Here are the details of the lead you accepted: " . formatLeadDetails($leadDetails);
 
         $mail = new PHPMailer(true);
@@ -128,7 +114,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['lead_id'], $_POST['lea
     header("Location: index.php");
     exit;
 }
-
 
 function formatLeadDetails($details)
 {
