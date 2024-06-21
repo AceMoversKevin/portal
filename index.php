@@ -17,25 +17,28 @@ if ($startDate && $endDate) {
     $startDate = date('Y-m-d', strtotime($startDate));
     $endDate = date('Y-m-d', strtotime($endDate));
 
-    // Updated SQL query to filter based on the date range
+    // Updated SQL query to filter based on the date range and isReleased = 1
     $sql = "SELECT leads.* FROM leads
             LEFT JOIN user_quotations ON leads.lead_id = user_quotations.lead_id AND user_quotations.user_id = ?
             WHERE user_quotations.lead_id IS NULL
             AND leads.booking_status = 0
             AND leads.acceptanceLimit > 0
+            AND leads.isReleased = 1
             AND DATE(leads.created_at) BETWEEN ? AND ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sss", $user_id, $startDate, $endDate); // Bind parameters
 } else {
-    // Original SQL query if no dates are selected
+    // Updated SQL query to include isReleased = 1 if no dates are selected
     $sql = "SELECT leads.* FROM leads
             LEFT JOIN user_quotations ON leads.lead_id = user_quotations.lead_id AND user_quotations.user_id = ?
             WHERE user_quotations.lead_id IS NULL
             AND leads.booking_status = 0
-            AND leads.acceptanceLimit > 0";
+            AND leads.acceptanceLimit > 0
+            AND leads.isReleased = 1";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $user_id); // user_id is a session variable
 }
+
 
 $stmt->execute();
 $result = $stmt->get_result();
