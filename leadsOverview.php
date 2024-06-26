@@ -17,7 +17,8 @@ $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 $dateFilter = isset($_GET['date_filter']) ? $_GET['date_filter'] : '';
 
 // Handle column visibility
-$visibleColumns = isset($_GET['visible_columns']) ? explode(',', $_GET['visible_columns']) : ['lead_id', 'lead_name', 'bedrooms', 'pickup', 'dropoff', 'lead_date', 'phone', 'email', 'details', 'acceptanceLimit', 'booking_status', 'created_at', 'isReleased'];
+$allColumns = ['lead_id', 'lead_name', 'bedrooms', 'pickup', 'dropoff', 'lead_date', 'phone', 'email', 'details', 'acceptanceLimit', 'booking_status', 'created_at', 'isReleased'];
+$visibleColumns = isset($_GET['visible_columns']) ? (is_array($_GET['visible_columns']) ? $_GET['visible_columns'] : explode(',', $_GET['visible_columns'])) : $allColumns;
 
 // Construct SQL query with search and date filter
 $sql = "SELECT * FROM leads WHERE 
@@ -134,6 +135,14 @@ $nextOrder = $sortOrder === 'asc' ? 'desc' : 'asc';
         </select>
         <input type="date" name="start_date" id="start_date" class="form-control" style="display:inline-block; width: auto;">
         <input type="date" name="end_date" id="end_date" class="form-control" style="display:inline-block; width: auto;">
+        <select name="visible_columns[]" id="visible_columns" multiple class="form-control" style="display:inline-block; width: auto;">
+            <?php
+            foreach ($allColumns as $column) {
+                $selected = in_array($column, $visibleColumns) ? 'selected' : '';
+                echo "<option value='$column' $selected>$column</option>";
+            }
+            ?>
+        </select>
         <button type="submit" class="btn btn-primary">Filter</button>
         <button type="button" onclick="window.location.href='leadsOverview.php'" class="btn btn-outline-secondary">Reset</button>
     </form>
@@ -188,17 +197,6 @@ $nextOrder = $sortOrder === 'asc' ? 'desc' : 'asc';
                     $('#start_date, #end_date').hide();
                 }
             }).trigger('change');
-
-            // Column selector logic
-            $('#columnSelectorDropdown .dropdown-menu input[type="checkbox"]').on('change', function() {
-                var selectedColumns = [];
-                $('#columnSelectorDropdown .dropdown-menu input[type="checkbox"]:checked').each(function() {
-                    selectedColumns.push($(this).val());
-                });
-                var url = new URL(window.location.href);
-                url.searchParams.set('visible_columns', selectedColumns.join(','));
-                window.location.href = url.href;
-            });
 
             $('.editable').on('dblclick', function() {
                 var $td = $(this);
