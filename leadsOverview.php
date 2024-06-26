@@ -135,14 +135,21 @@ $nextOrder = $sortOrder === 'asc' ? 'desc' : 'asc';
         </select>
         <input type="date" name="start_date" id="start_date" class="form-control" style="display:inline-block; width: auto;">
         <input type="date" name="end_date" id="end_date" class="form-control" style="display:inline-block; width: auto;">
-        <select name="visible_columns[]" id="visible_columns" multiple class="form-control" style="display:inline-block; width: auto;">
+        <div class="mb-2">
+            <button type="button" id="select_all" class="btn btn-outline-secondary btn-sm">Select All</button>
+            <button type="button" id="deselect_all" class="btn btn-outline-secondary btn-sm">Deselect All</button>
+        </div>
+        <div class="form-check">
             <?php
             foreach ($allColumns as $column) {
-                $selected = in_array($column, $visibleColumns) ? 'selected' : '';
-                echo "<option value='$column' $selected>$column</option>";
+                $checked = in_array($column, $visibleColumns) ? 'checked' : '';
+                echo "<div class='form-check'>
+                        <input class='form-check-input' type='checkbox' name='visible_columns[]' value='$column' id='$column' $checked>
+                        <label class='form-check-label' for='$column'>$column</label>
+                      </div>";
             }
             ?>
-        </select>
+        </div>
         <button type="submit" class="btn btn-primary">Filter</button>
         <button type="button" onclick="window.location.href='leadsOverview.php'" class="btn btn-outline-secondary">Reset</button>
     </form>
@@ -249,6 +256,15 @@ $nextOrder = $sortOrder === 'asc' ? 'desc' : 'asc';
             if ($.fn.resizableColumns) {
                 $('.resizable').resizableColumns();
             }
+
+            // Select All and Deselect All functionality
+            $('#select_all').on('click', function() {
+                $('.form-check-input').prop('checked', true);
+            });
+
+            $('#deselect_all').on('click', function() {
+                $('.form-check-input').prop('checked', false);
+            });
         });
     </script>
 
